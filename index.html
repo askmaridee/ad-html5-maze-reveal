@@ -1,0 +1,418 @@
+<div id="hc_richmedia">  
+    <meta name="viewport" content="width=device-width">
+	<script type="text/javascript">
+		if(!window.jQuery || !window.$) {
+			document.write('\x3Cscript src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript">\x3C/script>');
+		}
+	</script>
+	<script src="scripts/maze/27566.js" type="text/javascript"></script>
+	<!--<script type="text/javascript" src="mraid.js"></script>-->
+	<link rel="stylesheet" type="text/css" href="css/maze/27565.css" media="screen" />
+    <style type="text/css">
+    body {
+    	margin:0;
+    }
+	#hc_richmedia {
+		position:relative;
+		width:320px;
+		margin:0 auto;
+	}
+	#hc_richmedia .hc_initial_view {
+		position:relative;
+		z-index:1;
+	}
+	#hc_richmedia .hc_content {
+		position:relative;
+		width:320px;
+		margin:0 auto;
+		z-index:1;
+	}
+	#hc_richmedia .hc_closebtn {
+		position: absolute;
+        z-index: 20;
+        top: 8px;
+        right: 8px;
+        width: 12px;
+        text-align: center;
+        cursor: pointer;
+	}
+    #hc_richmedia .hc_closebtn img {
+        width: 100%;
+    }
+	#hc_richmedia .frame_maze_btn {
+		bottom: 10px;
+        left: 75px;
+        position: absolute;
+        text-align: center;
+        width: 125px;
+        z-index: 20;
+	}
+	#hc_richmedia .hc_blockimg {
+		display:block;
+        width: 100%;
+	}
+        
+	/* custom styles */
+	div.flexslider {
+		border: 0 none;
+		z-index: 10;
+		box-shadow: 0 0 0; 
+		width:320px;
+		height:300px;
+	}
+	div .flex-direction-nav .flex-prev,
+	div .flex-direction-nav .flex-prev:hover{
+		background-image:none !important;
+		opacity:0.8 !important;
+		left: 0px !important;
+		display: block;
+		width: 30px;
+		height: 200px;
+		z-index: 30;
+	}
+	div .flex-direction-nav .flex-next,
+	div .flex-direction-nav .flex-next:hover{
+		background-image:none !important;
+		opacity:0.8 !important;
+		right: 0px !important;
+	}
+    
+    #canvas {
+        width: 320px;
+        height: 300px;
+    }
+    .frame_maze p {padding: 0;margin:0;}
+    a img {border: none; text-decoration: none;}
+    #debug {
+    	border:solid 1px green;
+    }
+    #frame_maze {
+    	position:absolute;
+    	top:0;
+    	left:0;
+    	z-index: 19;
+    }
+    </style>
+
+    	<div class="hc_initial_view">	
+			<a href="#" id="hc_expand" onclick="jQuery.hc_rm.expand(event); return false;">		
+				<img class="hc_banner hc_blockimg" src="images/maze/46974.gif" style="width:320px;height:50px;" />
+			</a>
+		</div><!-- end initial view content -->
+
+    	<div class="hc_content" id="hc_content" style="display:none;">
+			<div class="hc_closebtn" id="hc_closebtn" style="display:none;" onclick="jQuery.hc_rm.collapse(event); return false;">
+				<img src="images/maze/46961.png" align="absmiddle" />
+			</div>	
+    	
+    		<div class="frame_maze" id="frame_maze"></div>
+			<div class="frame_maze_btn">
+				<a class="hc_click" href="http://www.mcdonalds.com/usmobile/en/restaurant_locator.html" target="_blank">
+					<img id="storelocbtn" class="hc_blockimg" src="images/maze/46963.png" />
+				</a>
+			</div>
+			<div class="frame_slider">
+				<a class="hc_click" href="http://www.mcdonalds.com/usmobile/en/restaurant_locator.html" target="_blank">
+					<img id="offerimg" class="hc_blockimg" src="images/maze/46972.jpg" />
+				</a>
+			</div><!-- end flexslider -->
+        </div>
+        
+        
+        <script>
+        
+		/* DO NOT USE slashes for comments. */
+		/* use .toggle to reveal from left to right, down */
+		/* use .slideToggle to reveal from top to bottom */
+		
+		(function ($) {	
+					
+			var fifheight;
+						
+			$.hc_rm = {
+				getQP: function (p) {
+					if(window.location && typeof window.location.search === "string") {
+						var qArray = window.location.search.substr(1).split("&"),qParam,i;
+						for(i=0; i<qArray.length; i++) {
+							qParam = qArray[i].split("=");
+							if(qParam.length === 2 && qParam[0] === p) {
+								return unescape(qParam[1]);
+							}
+						}
+					}
+					return "null";
+				},
+				expand: function (e) {				
+					/* FIF support */
+					if(window.inDapIF === true) {
+						$("iframe",parent.document).each(function(iel, el){
+							if(el.contentWindow === window) {
+								fifheight = $(el).css("height");
+								$(el).css("height","300px");
+								return false;
+							}
+						});
+					}
+				
+					if (!e) { e = window.event; }
+					e.cancelBubble = true;
+					if (e.stopPropagation) e.stopPropagation();
+					
+					/* mraid function call */
+					if(typeof mraid !== "undefined") {
+						mraid.useCustomClose(true);
+						mraid.expand();
+					}
+					
+					/* animations for expand */
+					$("#hc_richmedia .hc_content").show();
+					$("#hc_richmedia .hc_closebtn").show();	
+					$("#hc_richmedia .hc_initial_view").hide();				
+					/*$("#hc_richmedia").append('<img src="#trk:expansion#?cb='+new Date().getTime()+'" style="position:absolute;width:1px;height:1px;" />');	*/				
+						    			
+	    			/* log initial maze impression upon expansion */
+					/*$("#hc_richmedia").append('<img src="#trk:i_maze#?cb='+new Date().getTime()+'"  style="position:absolute;width:1px;height:1px;" />');*/
+										
+					return false;					
+				},
+				collapse: function(e) {				
+					/* FIF support */
+					if(window.inDapIF === true) {
+						$("iframe",parent.document).each(function(iel, el){
+							if(el.contentWindow === window) {
+								$(el).css("height",fifheight);
+								return false;
+							}
+						});
+					}
+				
+					if (!e) { e = window.event; }
+					e.cancelBubble = true;
+					if (e.stopPropagation) e.stopPropagation();
+					
+					/* mraid function call */
+					if(typeof mraid !== "undefined") {
+						mraid.close();
+					}
+					
+					/* animations for collapse */
+					$("#hc_richmedia .hc_content").hide();
+					$("#hc_richmedia .hc_closebtn").hide();	
+					$("#hc_richmedia .hc_initial_view").show();				
+					/*$("#hc_richmedia").append('<img src="#trk:collapse#?cb='+new Date().getTime()+'" style="position:absolute;width:1px;height:1px;" />');*/
+						
+					return false;																		
+				},
+				engage: function(e) {				
+					if (!e) { e = window.event; }
+					e.cancelBubble = true;
+					if (e.stopPropagation) e.stopPropagation();
+					/*$("#hc_richmedia").append('<img src="#trk:engage#?cb='+new Date().getTime()+'" style="position:absolute;width:1px;height:1px;" />');*/
+					return false;					
+				}
+				
+			};
+					
+		}(jQuery));
+		
+		/* Add mraid lister */
+		if(typeof mraid !== "undefined") {
+			mraid.addEventListener("stateChange", handleStateChanges);
+		}
+		
+		/* Mraid Handle State Change */
+		function handleStateChanges() {
+
+			switch(mraid.getState()) {
+				case "expanded":
+					jQuery.hc_rm.expand();
+					break;
+				case "default":
+					jQuery.hc_rm.collapse();
+					break;
+			}
+			
+		}
+
+		/* Maze game functions */        
+			$(function(){
+			
+				var offset = $(".hc_initial_view").offset();
+				
+				var domcanvas = document.createElement("canvas");
+				domcanvas.id="canvas";
+				domcanvas.width=320;
+				domcanvas.height=300;
+			
+				$("#frame_maze").html(domcanvas);
+							
+				var canvas = document.getElementById('canvas');
+        		var context = canvas.getContext('2d');
+        		
+        		var start = (Math.PI/180)*0;
+        		var end = (Math.PI/180)*360;
+        		
+             	var points=['91,39','91,54','75,55','59,56','57,74','57,92','71,94','86,96','92,105','86,115','72,115','57,118','57,134','72,134','91,137','92,154','106,155','122,158','124,175','125,194','126,215','150,220','175,220','195,220','216,220','239,221','239,240'];
+             	points.reverse();
+             	
+             	context.lineWidth = 16;
+        		var prev = '91,24';
+        		var next = points[points.length -1];
+        		
+        		var img = new Image();
+        		
+        		img.onload = function() {
+        			context.beginPath();
+        			context.drawImage(img, 0, 0, 320, 300);
+        			context.closePath();       			
+        		};
+        		
+        		img.src = 'images/maze/46958.jpg';
+        	
+        		var img2 = new Image();
+        		
+        		img2.onload = function() {
+                    context.strokeStyle = context.createPattern(img2, "no-repeat");
+        			context.fillStyle = context.createPattern(img2, "no-repeat");
+        		};
+        	
+        		img2.src = 'images/maze/46973.png';
+
+        		var drawer = {
+					isDrawing: false,
+					win: false,
+					mousedown: function(coords) {
+						context.beginPath();
+	      				context.moveTo(coords.x, coords.y);
+	      				this.isDrawing = true;
+					},
+					mousemove: function(coords){
+						if (this.isDrawing) {
+            				this.checkCoords(coords);
+	      				}
+					},
+					mouseup: function(coords){
+						if (this.isDrawing) {
+	         				this.mousemove(coords);
+	         				this.isDrawing = false;
+	      				}
+					},
+					touchstart: function(coords) {
+						context.beginPath();
+						context.moveTo(coords.x,coords.y);
+						this.isDrawing=true;
+					},
+					touchmove: function(coords) {
+	   					if (this.isDrawing) { 
+	   						this.checkCoords(coords); 
+	   					}        			
+					},
+					touchend: function(coords) {
+						if(this.isDrawing) {
+							this.touchmove(coords);
+							this.isDrawing=false;
+						}
+					},
+					checkCoords: function(coords) {
+						
+						if(next) {
+
+							tmp = next.split(",");
+							expx = parseInt(tmp[0]);
+							expy = parseInt(tmp[1]);
+							curx = coords.x;
+							cury = coords.y;
+							if(coords.device == "touch") {
+								compx = expx - (curx - offset.left);
+							} else {
+								compx = expx - curx;
+							}
+							if(coords.device == "touch") {
+								compy = expy - (cury - (offset.top + 0));
+							} else {
+								compy = expy - cury;
+							}
+							comp = Math.sqrt((compx*compx)+(compy*compy));
+							
+							$("#debug").html(coords.x+":"+coords.y+":"+tmp[0]+":"+tmp[1]);
+							
+							if(comp < 22) {
+								tmp = prev.split(",");
+								tmp2 = next.split(",");	
+								
+								context.beginPath();
+	            				context.moveTo(parseInt(tmp[0]),parseInt(tmp[1]));
+	            				context.lineTo(parseInt(tmp2[0]),parseInt(tmp2[1]));
+	            				context.stroke();
+	            				context.closePath();
+	            				
+	            				context.beginPath();
+	        					context.arc(parseInt(tmp[0]),parseInt(tmp[1]),6,start,end,true);
+	        					context.fill();
+	        					context.closePath();
+	        					
+	            				context.beginPath();
+	        					context.arc(parseInt(tmp2[0]),parseInt(tmp2[1]),6,start,end,true);
+	        					context.fill();
+	        					context.closePath();
+	        					
+								prev = next;
+								points.pop();
+								next = points[points.length -1];
+								return true;
+							}
+						} else {
+							if(this.win === false) {
+        						setTimeout(function() {
+    								$(".frame_maze").fadeOut("slow");
+    								$(".frame_maze_btn").fadeOut("slow");
+								}, 1500);
+		                		this.win = true;
+								/*$("#hc_richmedia").append('<img src="#trk:i_dollarasbothen320#?cb='+new Date().getTime()+'"  style="position:absolute;width:1px;height:1px;" />');*/
+							}
+							
+						}
+						
+						return false;					
+					}
+				};
+				
+				function draw(event){
+					event.preventDefault();
+					if(event.type.match('mouse')) {
+						var coords = {
+							x: event.offsetX,
+							y: event.offsetY,
+							device: 'mouse'
+						}
+					} else {
+                        
+                        //console.log(event);
+                        //console.log(event.touches);
+						
+						var coords = {
+							x: event.touches[0].pageX,
+							y: event.touches[0].pageY,
+							device: 'touch'
+						}
+                        
+                        console.log(coords);
+					}
+				 
+				   drawer[event.type](coords);
+				}
+				
+				canvas.addEventListener('mousedown',draw, false);
+				canvas.addEventListener('mousemove',draw, false);
+				canvas.addEventListener('mouseup',draw, false);
+				canvas.addEventListener('touchstart',draw,false);
+				canvas.addEventListener('touchmove', draw, false);
+				canvas.addEventListener('touchend',draw,false);
+        		
+			});
+									
+
+        </script>
+
+</div><!-- end required wrapper -->
+<div class="clear"></div>
